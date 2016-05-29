@@ -1,0 +1,31 @@
+﻿body {
+    /* background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='120px'><text x='0' y='15' fill='red' font-size='20'>I love SVG!&lt;</text></svg>");
+     */
+    /*<svg viewBox="0 0 40 40" height="25" width="25" xmlns="http://www.w3.org/2000/svg"><path fill="rgb(91, 183, 91)" d="M2.379,14.729L5.208,11.899L12.958,19.648L25.877,6.733L28.707,9.561L12.958,25.308Z"/></svg>*/
+ background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIGhlaWdodD0iMjUiIHdpZHRoPSIyNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBmaWxsPSJyZ2IoOTEsIDE4MywgOTEpIiBkPSJNMi4zNzksMTQuNzI5TDUuMjA4LDExLjg5OUwxMi45NTgsMTkuNjQ4TDI1Ljg3Nyw2LjczM0wyOC43MDcsOS41NjFMMTIuOTU4LDI1LjMwOFoiLz48L3N2Zz4KCg"); 
+ /* background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAFSDNYfAAAAaklEQVR42u3XQQrAIAwAQeP%2F%2F6wf8CJBJTK9lnQ7FpHGaOurt1I34nfH9pMMZAZ8BwMGEvvh%2BBsJCAgICLwIOA8EBAQEBAQEBAQEBK79H5RfIQAAAAAAAAAAAAAAAAAAAAAAAAAAAID%2FABMSqAfj%2FsLmvAAAAABJRU5ErkJggg%3D%3D);
+   */
+      background-position: center center; 
+
+    	background-repeat: no-repeat;
+
+         border: 0px solid green;
+
+         
+         font-family:Arial ;
+}
+div
+{
+    border: 0px solid grey;
+    
+}
+span
+{
+    /*font-weight:bold;*/
+   
+}
+#poi
+{
+     background: no-repeat center center url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAuMDAwMDAwMDAwMDAwMDYiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCA1MDAgNTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBmaWxsPSIjZmYwMDAwIj48cGF0aCBkPSJNIDI1MC4wMCwzMC4wMEwgMzA5LjcwLDE5OC4wNUwgNDcwLjAwLDE5OC4wNUwgMzM5LjIwLDI5Ni43NUwgMzg1Ljk1LDQ3MC4wMEwgMjUwLjAwLDM2Ni4xNUwgMTE0LjA1LDQ3MC4wMEwgMTYwLjgwLDI5Ni43NUwgMzAuMDAsMTk4LjA1TCAxOTAuMzAsMTk4LjA1IHoiID48L3BhdGg+PC9zdmc+"); 
+
+}

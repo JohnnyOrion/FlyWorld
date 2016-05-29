@@ -1,0 +1,476 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Fly World</title>
+    <link rel="stylesheet" type="text/css" href="Style.css" />
+
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+
+    <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
+
+    <script type="text/javascript" src="UI.js"></script> 
+    <script type="text/javascript">
+        function SliderWasChangedFD(arg) {
+            var sp = document.getElementById("toseedate");
+            var abs = parseInt(arg.GetValueAbstract());
+            gFromdate = new Date(abs);
+            sp.innerHTML = gFromdate.toLocaleDateString();
+        }
+        function SliderEstablishedFY(arg) {
+
+            var sp = document.getElementById("toseeyear");
+            sp.innerHTML = arg.m_iPosition;
+
+            arg.m_fMin = Date.now();
+            var fromy = new Date(arg.m_fMin);
+            var tomax = new Date(arg.m_fMin);
+            tomax.setFullYear(fromy.getFullYear() + 5);
+            arg.m_fMax = tomax.getTime();
+            SliderWasChangedFY(arg);
+
+        }
+        function SliderWasChangedFY(arg) {
+            var sp = document.getElementById("toseeyear");
+            var abs = parseInt(arg.GetValueAbstract());
+            sp.innerHTML = (new Date(abs)).getFullYear();
+            // set date scroller to comfort year picked to a date next year
+            gUI.m_pMainForm.m_pFromDate.m_fMin = parseInt(arg.GetValueAbstract());
+            arg.m_iPosition = arg.m_iPosition + 1;
+            gUI.m_pMainForm.m_pFromDate.m_fMax = parseInt(arg.GetValueAbstract());
+            arg.m_iPosition = arg.m_iPosition - 1;
+            SliderWasChangedFD(gUI.m_pMainForm.m_pFromDate)
+        }
+        /*----------------------the end date cop--------------------------------*/
+        function SliderWasChangedTD(arg) {
+            var sp = document.getElementById("toseedateE");
+            var abs = parseInt(arg.GetValueAbstract());
+            gTodate = new Date(abs);
+            sp.innerHTML = gTodate.toLocaleDateString();
+        }
+        function SliderEstablishedTY(arg) {
+
+            var sp = document.getElementById("toseeyearE");
+            sp.innerHTML = arg.m_iPosition;
+
+            arg.m_fMin = Date.now();
+            var fromy = new Date(arg.m_fMin);
+            var tomax = new Date(arg.m_fMin);
+            tomax.setFullYear(fromy.getFullYear() + 5);
+            arg.m_fMax = tomax.getTime();
+            SliderWasChangedTY(arg);
+
+        }
+        function SliderWasChangedTY(arg) {
+            var sp = document.getElementById("toseeyearE");
+            var abs = parseInt(arg.GetValueAbstract());
+            sp.innerHTML = (new Date(abs)).getFullYear();
+            // set date scroller to comfort year
+            gUI.m_pMainForm.m_pToDate.m_fMin = parseInt(arg.GetValueAbstract());
+            arg.m_iPosition = arg.m_iPosition + 1;
+            gUI.m_pMainForm.m_pToDate.m_fMax = parseInt(arg.GetValueAbstract());
+            arg.m_iPosition = arg.m_iPosition - 1;
+            SliderWasChangedTD(gUI.m_pMainForm.m_pToDate)
+        }
+        var gMap = null;
+        var gFromdate = null;
+        var gTodate = null;
+
+        var HoldD= function (e) 
+        {
+           /* var span = document.getElementById(spid);
+            if (span.m_HasEv === undefined) {
+                span.addEventListener('mousedown', Passup, true);
+                span.m_HasEv = true;
+                alert('ad');
+            }*/
+            TogglePick(e.target.id);
+        //    e.stopPropagation(); // 
+      //      e.preventDefault(); // default browser actions
+        }
+
+        function TogglePick(spid)
+        {
+           
+
+            var col = document.getElementById('collectionSP');
+            var elems = col.children;
+            var elemc = elems.length;
+            var spans = new Array();
+            for (var i = 0; i < elemc; i++) {
+                if (elems[i].tagName.toLowerCase()==='span')
+                {
+                    spans[elems[i].id] = elems[i];
+                    if (spid !== elems[i].id) {
+                        spans[elems[i].id].m_iActive = -1;
+                        spans[elems[i].id].style.backgroundColor = 'white';
+                       
+                    }
+                }
+            }
+            var span = document.getElementById(spid);
+     
+           
+            if (span.m_iActive === undefined)
+                span.m_iActive = -1;
+             span.m_iActive *= -1;
+             if (span.m_iActive > 0) {
+                     span.style.backgroundColor = span.getAttribute('highlight');
+            }
+            else
+            {
+                span.style.backgroundColor = 'white';
+            }
+        }
+        function DropPoi(e)
+        {
+
+        }
+        function FreePoi(e) {
+
+            DetectPoi(e);
+            // just set spans all to inactive
+            var col = document.getElementById('collectionSP');
+            var elems = col.children;
+            var elemc = elems.length;
+            var spans = new Array();
+            for (var i = 0; i < elemc; i++) {
+                if (elems[i].tagName.toLowerCase() === 'span') {
+                    spans[elems[i].id] = elems[i];
+                    spans[elems[i].id].m_iActive = -1;
+                    spans[elems[i].id].style.backgroundColor = 'white';
+                }
+            }
+         
+            
+        }
+        var gDests = new Array();
+        function DetectPoi(e)
+        {
+            var col = document.getElementById('collectionSP');
+            var elems = col.children;
+            var elemc = elems.length;
+            var spans = new Array();
+            var activeSpan = null;
+            var actN = 0;
+            var n=-1;
+            for (var i = 0; i < elemc; i++) {
+                if (elems[i].tagName.toLowerCase() === 'span') {
+                    spans[elems[i].id] = elems[i];
+                    n++;
+                    if (spans[elems[i].id].m_iActive >0) {
+                        activeSpan = spans[elems[i].id];
+                        actN = n;
+                    }
+                }
+            }
+            if (activeSpan!==null)
+            {
+                var rct = document.getElementById('map').getBoundingClientRect();
+
+                var color = '#f86767';
+                if (activeSpan.getAttribute('highlight')==='blue')
+                    color = '#1867ff';
+                var marker = L.marker(gCoughtLng, {
+                    icon: L.mapbox.marker.icon({
+                        'marker-color': color
+                    }),
+                    draggable: false
+                }).addTo(gLMap);
+                
+                if (gDests[actN]!==undefined)
+                if (gDests[actN].marker !== undefined)
+                    gLMap.removeLayer(gDests[actN].marker);
+                gDests[actN] = {"marker":marker,"pos":marker.getLatLng()};
+            }
+        }
+        function ObjToUri(obj)
+        {
+            var str = Object.keys(obj).map(function (key) {
+                return encodeURIComponent(String(key)) + '=' + encodeURIComponent(String(obj[key]));
+            }).join('&');
+            return str;
+        }
+        var gJsonResp = null;
+        var gJsonRespB = null;
+        function FindFlights()
+        {
+           
+            // remove flights
+            var anch = document.getElementById('FList');
+            while (anch.firstChild) {
+                anch.removeChild(anch.firstChild);
+            }
+
+             if ((gDests[0] !== undefined && gDests[1] !== undefined) )
+            {
+                var from = gDests[0].pos;
+                var to = gDests[1].pos;
+                var reqobject = {
+                    "dateFrom": gFromdate.getDate() + "/" + (gFromdate.getMonth()+1)+"/"+gFromdate.getFullYear(),
+                    "dateTo": gTodate.getDate() + "/" + (gTodate.getMonth()+1) + "/" + gTodate.getFullYear(),
+                    "partner": "picky",
+                    "latitudeFrom":gDests[0].pos.lat,
+                    "longitudeFrom":gDests[0].pos.lng,
+                    "radiusFrom":500,
+                    "latitudeTo":gDests[1].pos.lat,
+                    "longitudeTo":gDests[1].pos.lng,
+                    "radiusTo": 500,
+                    "sort": "date",
+                    "asc": 1,
+                    "limit":20
+
+                }
+               
+
+                var request = new XMLHttpRequest();
+                var theqr = "https://api.skypicker.com/flights?" + ObjToUri(reqobject);
+                request.open('GET', theqr,false);
+
+                request.onreadystatechange = function () {
+                    if (this.readyState === 4) {
+                     /*   console.log('Request:', theqr);
+                        console.log('Status:', this.status);
+                        console.log('Headers:', this.getAllResponseHeaders());
+                        console.log('Body:', this.responseText);*/
+                        gJsonResp = this.responseText;
+                        OutputFlightsThere();
+                    }
+                };
+               
+                request.send();
+                 //--------------request returnals-------------------
+                reqobject = {
+                    "dateFrom": gFromdate.getDate() + "/" + (gFromdate.getMonth() + 1) + "/" + gFromdate.getFullYear(),
+                    "dateTo": gTodate.getDate() + "/" + (gTodate.getMonth() + 1) + "/" + gTodate.getFullYear(),
+                    "partner": "picky",
+                    "latitudeFrom": gDests[1].pos.lat,
+                    "longitudeFrom": gDests[1].pos.lng,
+                    "radiusFrom": 500,
+                    "latitudeTo": gDests[0].pos.lat,
+                    "longitudeTo": gDests[0].pos.lng,
+                    "radiusTo": 500,
+                    "sort": "date",
+                    "asc": 0,
+                    "limit": 20
+
+                }
+
+
+                request = new XMLHttpRequest();
+                theqr = "https://api.skypicker.com/flights?" + ObjToUri(reqobject);
+                request.open('GET', theqr,false);
+
+                request.onreadystatechange = function () {
+                    if (this.readyState === 4) {
+                       /* console.log('Request:', theqr);
+                        console.log('Status:', this.status);*/
+                        gJsonRespB = this.responseText;
+                        OutputFlightsBack();
+                    }
+                };
+
+                request.send();
+            }
+            
+        }
+        var gData = null;
+        var gIndex = 0;
+        function OutputFlightsThere()
+        {
+            
+            var arrjson = JSON.parse(gJsonResp); 
+            var data = arrjson.data;
+            gData=data;
+            var anchor = document.getElementById('FList');
+            var cnt = data.length;
+            for (var i = 0; i < cnt; i++) {
+                if (i !== gIndex)
+                    continue;
+                            var dv=document.createElement("div");
+                            anchor.appendChild(dv);
+                            var inner = "";
+                            var k = Object.keys(data[i]);
+
+                            inner += data[i]["mapIdfrom"] + " &rarr; " + data[i]["mapIdto"];
+                            var dt = new Date(/*parseInt(data[i]["dTime"]))**/parseInt(data[i]["dTimeUTC"]));//not including the date portion too !
+                            inner += " at " + dt.toLocaleTimeString() + "<br><span onmousedown=\"Navigate(0," + i + ");\" style=\"cursor:pointer;\">show</span>";
+                            inner += "<br>" + "<a href=\"" + data[i]["deep_link"] + "\" target=\"_blank\">manage</a><br>";
+                           
+                          /*  inner+="<span style=\"font-size:6pt;\">";
+                            for (var n = 0; n < k.length; n++)
+                            {
+                                inner +=k[n]+":"+ data[i][k[n]] + "<br>";
+                            }
+                            inner += "</span>";*/
+                            dv.innerHTML = inner + "<br>-----------------------------";
+                            
+                        }
+                        
+               
+
+        }
+        var gDataB = null;
+        var gIndexB = 0;
+        function OutputFlightsBack()
+        {
+            var arrjson = JSON.parse(gJsonRespB);
+            var data = arrjson.data;
+            gDataB = data;
+            var anchor = document.getElementById('FList');
+            var cnt = data.length;
+            for (var i = 0; i < cnt; i++) {
+                if (i !== gIndexB)
+                    continue;
+                var dv = document.createElement("div");
+                anchor.appendChild(dv);
+                var inner = "";
+                var k = Object.keys(data[i]);
+
+                inner += data[i]["mapIdfrom"] + " &rarr; " + data[i]["mapIdto"];
+                var dt = new Date(/*parseInt(data[i]["dTime"]))**/parseInt(data[i]["dTimeUTC"]));//not including the date portion too !
+                inner += " at " + dt.toLocaleTimeString() + "<br><span onmousedown=\"Navigate(1," + i + ");\" style=\"cursor:pointer;\">show</span>";
+                inner += "<br>" + "<a href=\"" + data[i]["deep_link"] + "\" target=\"_blank\">manage</a><br>";
+
+                /*  inner+="<span style=\"font-size:6pt;\">";
+                  for (var n = 0; n < k.length; n++)
+                  {
+                      inner +=k[n]+":"+ data[i][k[n]] + "<br>";
+                  }
+                  inner += "</span>";*/
+                dv.innerHTML = inner + "<br>-----------------------------";
+
+            }
+        }
+        var mk1 = null;
+        var mk2 = null;
+        function Navigate(wt,index)
+        {
+            if (mk1 !== null)
+                gLMap.removeLayer(mk1);
+
+            if (mk2 !== null)
+                gLMap.removeLayer(mk2);
+
+            var data = (wt === 0) ? gData : gDataB;
+            var flight = data[index];
+            var endi=flight["route"].length-1;
+
+            var fromP = { "lat": flight["route"][0]["latFrom"], "lng": flight["route"][0]["lngFrom"] };
+            var toP = { "lat": flight["route"][endi]["latTo"], "lng": flight["route"][endi]["lngTo"] };
+
+            var color = '#18ff67';
+            mk1 = L.marker(fromP, {
+                icon: L.mapbox.marker.icon({
+                    'marker-color': color
+                }),
+                draggable: false
+            }).addTo(gLMap);
+
+            mk2 = L.marker(toP, {
+                icon: L.mapbox.marker.icon({
+                    'marker-color': color
+                }),
+                draggable: false
+            }).addTo(gLMap);
+
+              
+            
+        }
+    </script>
+
+</head>
+<body id="el_body" >
+    <div style="float:left;">
+        <div id="cont_fromdate" style="border:solid green 2px;width:250px;">
+            You start on the date?...<br>
+
+            <div ui_class="Slider" ui_count="365" ui_min="-1.0" ui_max="1.0" ui_position="0" ui_onchanged="SliderWasChangedFD" variablename="m_pFromDate" style="width:240px;height:48px;border:solid 1px green;"></div>
+            The start date: <span id="toseedate" style="font-weight: bold; float: right"></span>
+            <div ui_class="Slider" ui_count="5" ui_min="-1.0" ui_max="1.0" ui_position="0" ui_onchanged="SliderWasChangedFY" ui_onestablished="SliderEstablishedFY" variablename="m_pFromYear" style="width:240px;height:30px;border:solid 1px green;"></div>
+            The year: <span id="toseeyear"></span>
+        </div>
+        <br>
+        <div id="cont_todate" style="border:solid green 2px;width:250px;">
+            You end on the date?...<br>
+
+            <div ui_class="Slider" ui_count="365" ui_min="-1.0" ui_max="1.0" ui_position="0" ui_onchanged="SliderWasChangedTD" variablename="m_pToDate" style="width:240px;height:48px;border:solid 1px green;"></div>
+            The end date: <span id="toseedateE" style="font-weight: bold;float:right;"></span>
+            <div ui_class="Slider" ui_count="5" ui_min="-1.0" ui_max="1.0" ui_position="0" ui_onchanged="SliderWasChangedTY" ui_onestablished="SliderEstablishedTY" variablename="m_pToYear" style="width:240px;height:30px;border:solid 1px green;"></div>
+            The year: <span id="toseeyearE"></span>
+        </div>
+
+        <div style="display: block;">
+            <div id="cont_dest1" style="border:solid green 2px;width:250px;padding:6px 6px 6px 6px;">
+                <div id="collectionSP">
+                    <span id="pick1" style="cursor:pointer;" highlight="red"> Pick destination 1</span> <br><br>
+                    <span id="pick2" style="cursor:pointer;" highlight="blue"> Pick destination 2</span>
+                    <script type="text/javascript">
+                        document.getElementById('pick1').addEventListener('mousedown', HoldD, true);
+                        document.getElementById('pick2').addEventListener('mousedown', HoldD, true);
+                    </script>
+
+                </div>
+            </div>
+        </div>
+     
+        <div style="display:block;">
+            <span id="find" style="cursor:pointer;font-style:italic;" highlight="red"> Find Flights</span> <br><br>
+            <script type="text/javascript">
+                document.getElementById('find').addEventListener('mousedown', FindFlights, false);
+            </script>
+            <div id="FList" style="display:block;font-style:oblique;font-weight:bolder;width:400px"></div>
+        </div>
+
+
+
+
+    </div>
+
+
+
+    
+
+        <div id='map' style='width: 640px; height: 480px;display:inline-block;'></div>
+        <script>
+          /*  mapboxgl.accessToken = 'pk.eyJ1Ijoiam9obm55b3Jpb24xIiwiYSI6ImNpb3JxMjR6bjAwMHZ3ZGtqamtkdDNmancifQ.0uGVsEtTguZOFklB7EFGbA';
+            var map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v8',
+                center: [-122.420679, 37.772537],
+                zoom: 13,
+                hash: true
+            });
+            
+            gMap = map;
+            gMap.setCenter([-73.9749, 40.7736]);
+            gMap.setZoom(2);*/
+
+            L.mapbox.accessToken = 'pk.eyJ1Ijoiam9obm55b3Jpb24xIiwiYSI6ImNpb3JxMjR6bjAwMHZ3ZGtqamtkdDNmancifQ.0uGVsEtTguZOFklB7EFGbA';
+            var gLMap = L.mapbox.map('map', 'mapbox.streets')
+                .setView([0, 0], 2);
+            gCoughtLng = null;
+            gLMap.on('mousemove', function (e) {
+                gCoughtLng = e.latlng;
+            });
+           
+        </script>
+
+   
+
+
+
+
+    
+    
+    <script type="text/javascript">
+      //  document.addEventListener('mousedown', DropPoi, true);
+        document.getElementById('map').addEventListener('mousedown', FreePoi, false);
+    </script>
+
+    <script>
+        InitStraight(document.body);
+    </script>
+   </body>
+</html>
